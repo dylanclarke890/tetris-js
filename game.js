@@ -16,6 +16,7 @@ const settings = {
   rows: 20,
   size: 25,
   emptyCellColor: "white",
+  blockDescendInterval: 1, // in seconds
 };
 let state;
 
@@ -27,10 +28,6 @@ let board = [];
     Array.from({ length: cols }, () => emptyCellColor)
   );
 })();
-
-function newGame() {
-  state = {};
-}
 
 const blockTypes = {
   t: [
@@ -197,6 +194,37 @@ const blockTypes = {
   ],
 };
 
+class Block {
+  constructor(rotations, color) {
+    this.rotations = rotations;
+    this.color = color;
+    this.currentRotation = 0;
+    this.activeTetromino = this.rotations[this.currentRotation];
+    this.downInterval = settings.blockDescendInterval * settings.fps;
+    this.timer = 0;
+    this.x = 0;
+    this.y = 0;
+  }
+
+  update() {
+    if (this.timer % this.downInterval === 0) this.y += 1;
+    this.timer++;
+  }
+
+  draw() {
+    for (let r = 0; r < this.activeTetromino.length; r++)
+      for (let c = 0; c < this.activeTetromino[r].length; c++)
+        if (this.activeTetromino[r][c])
+          drawSquare(this.x + c, this.y + r, this.color);
+  }
+}
+
+function newGame() {
+  state = {
+    activeBlock: new Block(blockTypes.l, "green"),
+  };
+}
+
 function drawSquare(x, y, color) {
   const size = settings.size;
   ctx.fillStyle = color;
@@ -215,6 +243,8 @@ function drawBoard() {
 
 function update() {
   drawBoard();
+  state.activeBlock.update();
+  state.activeBlock.draw();
 }
 
 let stop = false,
