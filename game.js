@@ -8,6 +8,14 @@ function new2dCanvas(id, width, height) {
 
 const [canvas, ctx] = new2dCanvas("play-area", 800, 500);
 
+const FPS = 60;
+const settings = {
+  fps: FPS,
+  fpsInterval: 1000 / FPS,
+};
+
+function update() {}
+
 let stop = false,
   now,
   lastFrame;
