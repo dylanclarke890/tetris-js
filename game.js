@@ -26,7 +26,6 @@ let board = [];
   board = Array.from({ length: rows }, () =>
     Array.from({ length: cols }, () => emptyCellColor)
   );
-  console.log(board);
 })();
 
 function newGame() {
