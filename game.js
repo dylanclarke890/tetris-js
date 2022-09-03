@@ -217,6 +217,12 @@ class Block {
         if (this.activeTetromino[r][c])
           drawSquare(this.x + c, this.y + r, this.color);
   }
+
+  nextRotation() {
+    this.currentRotation++;
+    this.activeTetromino =
+      this.rotations[this.currentRotation % this.activeTetromino.length];
+  }
 }
 
 function newGame() {
@@ -240,6 +246,17 @@ function drawBoard() {
     }
   }
 }
+
+window.addEventListener("keyup", (e) => {
+  switch (e.code.toLowerCase()) {
+    case "arrowup":
+      state.activeBlock.nextRotation();
+      break;
+
+    default:
+      break;
+  }
+});
 
 function update() {
   drawBoard();
