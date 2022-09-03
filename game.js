@@ -12,7 +12,26 @@ const FPS = 60;
 const settings = {
   fps: FPS,
   fpsInterval: 1000 / FPS,
+  cols: 10,
+  rows: 20,
+  size: 25,
+  emptyCellColor: "white",
 };
+let state;
+
+let board = [];
+
+(function createBoard() {
+  const { cols, rows, emptyCellColor } = settings;
+  board = Array.from({ length: rows }, () =>
+    Array.from({ length: cols }, () => emptyCellColor)
+  );
+  console.log(board);
+})();
+
+function newGame() {
+  state = {};
+}
 
 const blockTypes = {
   t: [
@@ -53,7 +72,25 @@ const blockTypes = {
   ],
 };
 
-function update() {}
+function drawSquare(x, y, color) {
+  const size = settings.size;
+  ctx.fillStyle = color;
+  ctx.fillRect(x * size, y * size, size, size);
+  ctx.strokeRect(x * size, y * size, size, size);
+}
+
+function drawBoard() {
+  for (let r = 0; r < board.length; r++) {
+    const row = board[r];
+    for (let c = 0; c < row.length; c++) {
+      drawSquare(c, r, row[c]);
+    }
+  }
+}
+
+function update() {
+  drawBoard();
+}
 
 let stop = false,
   now,
@@ -61,6 +98,7 @@ let stop = false,
 
 (function startAnimating() {
   lastFrame = window.performance.now();
+  newGame();
   animate();
 })();
 
