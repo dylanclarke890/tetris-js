@@ -8,13 +8,16 @@ function new2dCanvas(id, width, height) {
 
 const [canvas, ctx] = new2dCanvas("play-area", 800, 500);
 
-const FPS = 60;
+const FPS = 60,
+  COLS = 10,
+  SIZE = 25;
 const settings = {
   fps: FPS,
   fpsInterval: 1000 / FPS,
-  cols: 10,
+  cols: COLS,
   rows: 20,
-  size: 25,
+  size: SIZE,
+  boardOffset: COLS * SIZE,
   emptyCellColor: "white",
   blockDescendInterval: 1, // in seconds
   keyboardMoveInterval: 0.25,
@@ -289,6 +292,7 @@ function newGame() {
   state = {
     activeBlock: new Block(randomPiece(), randomColor()),
     gameOver: false,
+    score: 0,
   };
 }
 
@@ -323,8 +327,19 @@ function removeFullRows() {
         for (let c = 0; c < settings.cols; c++) board[y][c] = board[y - 1][c];
       for (let i = 0; i < settings.cols; i++)
         board[0][i] = settings.emptyCellColor;
+      state.score += 10;
     }
   }
+}
+
+function drawScore() {
+  const scorePos = {
+    x: settings.boardOffset + 50,
+    y: 50,
+  };
+  ctx.fillStyle = "white";
+  ctx.font = "30px Arial";
+  ctx.fillText(state.score, scorePos.x, scorePos.y);
 }
 
 window.addEventListener("keyup", (e) => {
@@ -353,8 +368,10 @@ window.addEventListener("keydown", (e) => {
 
 function update() {
   drawBoard();
+  drawScore();
   state.activeBlock.draw();
   state.activeBlock.update();
+
   if (state.activeBlock.locked)
     state.activeBlock = new Block(randomPiece(), randomColor());
   if (state.gameOver) stop = true;
