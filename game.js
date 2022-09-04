@@ -194,6 +194,11 @@ const blockTypes = {
   ],
 };
 
+function randomPiece() {
+  const blocks = Object.keys(blockTypes);
+  return blockTypes[blocks[Math.floor(Math.random() * blocks.length)]];
+}
+
 class Block {
   constructor(rotations, color) {
     this.x = 0;
@@ -207,7 +212,11 @@ class Block {
   }
 
   update() {
-    if (this.timer % this.downInterval === 0 && !this.willCollide(0, 1, this.activeTetromino)) this.y += 1;
+    if (
+      this.timer % this.downInterval === 0 &&
+      !this.willCollide(0, 1, this.activeTetromino)
+    )
+      this.y += 1;
     this.timer++;
   }
 
@@ -252,7 +261,7 @@ class Block {
 
 function newGame() {
   state = {
-    activeBlock: new Block(blockTypes.l, "green"),
+    activeBlock: new Block(randomPiece(), "green"),
   };
 }
 
