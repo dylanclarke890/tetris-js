@@ -20,9 +20,7 @@ const settings = {
   keyboardMoveInterval: 0.25,
 };
 let state;
-
 let board = [];
-
 let downPressed = false;
 
 (function createBoard() {
@@ -210,8 +208,8 @@ function randomColor() {
 
 class Block {
   constructor(rotations, color) {
-    this.x = 0;
-    this.y = 0;
+    this.x = 4;
+    this.y = -4;
     this.color = color;
     this.downInterval = settings.blockDescendInterval * settings.fps;
     this.timer = 0;
@@ -276,6 +274,10 @@ class Block {
     for (let r = 0; r < this.activeTetromino.length; r++)
       for (let c = 0; c < this.activeTetromino[r].length; c++) {
         if (!this.activeTetromino[r][c]) continue;
+        if (this.y + r < 0) {
+          state.gameOver = true;
+          break;
+        }
         this.locked = true;
         board[this.y + r][this.x + c] = this.color;
       }
@@ -285,6 +287,7 @@ class Block {
 function newGame() {
   state = {
     activeBlock: new Block(randomPiece(), randomColor()),
+    gameOver: false,
   };
 }
 
@@ -334,6 +337,7 @@ function update() {
   state.activeBlock.update();
   if (state.activeBlock.locked)
     state.activeBlock = new Block(randomPiece(), randomColor());
+  if (state.gameOver) stop = true;
 }
 
 let stop = false,
