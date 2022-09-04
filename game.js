@@ -318,6 +318,7 @@ function newGame() {
   state = {
     started: false,
     activeBlock: new Block(),
+    nextBlock: new Block(),
     gameOver: false,
     score: 0,
     linesCleared: 0,
@@ -393,6 +394,11 @@ function drawGameInfo() {
     canvas.width,
     scorePos.y + 50
   );
+
+  ctx.textAlign = "left";
+  const nextText = "Next:";
+  ctx.fillText(nextText, scorePos.x, scorePos.y + 100);
+  drawSquare(settings.cols + 2, settings.rows - 10, "blue");
 }
 
 const multicoloredTitle = [
@@ -479,7 +485,10 @@ function update() {
     state.activeBlock.draw();
     state.activeBlock.update();
 
-    if (state.activeBlock.locked) state.activeBlock = new Block();
+    if (state.activeBlock.locked) {
+      state.activeBlock = state.nextBlock;
+      state.nextBlock = new Block();
+    }
   } else if (!state.started) drawStartScreen();
   else drawGameOverScreen();
 }
