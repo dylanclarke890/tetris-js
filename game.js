@@ -12,7 +12,7 @@ const FPS = 60,
   COLS = 10,
   ROWS = 20,
   SIZE = canvas.height / ROWS;
-  
+
 const settings = {
   fps: FPS,
   fpsInterval: 1000 / FPS,
@@ -217,7 +217,7 @@ function randomColor() {
 function fillMixedText(args, x, y) {
   let defaultFillStyle = ctx.fillStyle;
   let defaultFont = ctx.font;
-
+  ctx.textAlign = "left";
   ctx.save();
   args.forEach(({ text, fillStyle, font }) => {
     ctx.fillStyle = fillStyle || defaultFillStyle;
@@ -319,6 +319,8 @@ function newGame() {
 function drawSquare(x, y, color) {
   const size = settings.size;
   ctx.fillStyle = color;
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = "#000";
   ctx.fillRect(x * size, y * size, size, size);
   ctx.strokeRect(x * size, y * size, size, size);
 }
@@ -352,11 +354,11 @@ function removeFullRows() {
   }
 }
 
+const scorePos = {
+  x: settings.boardOffset + 150,
+  y: canvas.height - 20,
+};
 function drawScore() {
-  const scorePos = {
-    x: settings.boardOffset + 50,
-    y: 50,
-  };
   ctx.fillStyle = "white";
   ctx.font = "30px Arial";
   ctx.fillText(state.score, scorePos.x, scorePos.y);
@@ -373,13 +375,39 @@ const multicoloredTitle = [
 function drawStartScreen() {
   const pos = {
     x: settings.boardOffset + (canvas.width - settings.boardOffset) / 2,
-    y: 150,
+    y: canvas.height / 2 - 50,
   };
   ctx.font = "80px Bangers cursive";
   fillMixedText(
     multicoloredTitle,
     pos.x - ctx.measureText("TETRIS").width / 2,
     pos.y
+  );
+
+  ctx.font = "30px Bangers cursive";
+  const text = "space to start";
+
+  ctx.lineWidth = 4;
+  ctx.strokeStyle = "orange";
+  const w = ctx.measureText(text).width + 20,
+    h = 50;
+  const startButtonArgs = [
+    settings.boardOffset + ((canvas.width - settings.boardOffset) / 2 - w / 2),
+    pos.y + 50,
+    w,
+    h,
+  ];
+  ctx.fillStyle = "yellow";
+  ctx.fillRect(...startButtonArgs);
+  ctx.strokeRect(...startButtonArgs);
+
+  ctx.fillStyle = "lightblue";
+
+  ctx.textAlign = "center";
+  ctx.fillText(
+    text,
+    settings.boardOffset + (canvas.width - settings.boardOffset) / 2,
+    pos.y + 85
   );
 }
 
@@ -404,6 +432,7 @@ window.addEventListener("keyup", (e) => {
 });
 
 window.addEventListener("keydown", (e) => {
+  if (!state.started && e.code === "Space") state.started = true;
   if (e.code === "ArrowDown") downPressed = true;
 });
 
