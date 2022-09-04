@@ -280,6 +280,7 @@ class Block {
         }
         this.locked = true;
         board[this.y + r][this.x + c] = this.color;
+        removeFullRows();
       }
   }
 }
@@ -303,6 +304,25 @@ function drawBoard() {
     const row = board[r];
     for (let c = 0; c < row.length; c++) {
       drawSquare(c, r, row[c]);
+    }
+  }
+}
+
+function removeFullRows() {
+  for (let r = 0; r < board.length; r++) {
+    const row = board[r];
+    let rowIsFull = true;
+    for (let c = 0; c < row.length; c++) {
+      if (row[c] === settings.emptyCellColor) {
+        rowIsFull = false;
+        break;
+      }
+    }
+    if (rowIsFull) {
+      for (let y = r; y > 1; y--)
+        for (let c = 0; c < settings.cols; c++) board[y][c] = board[y - 1][c];
+      for (let i = 0; i < settings.cols; i++)
+        board[0][i] = settings.emptyCellColor;
     }
   }
 }
