@@ -223,6 +223,22 @@ class Block {
     this.activeTetromino =
       this.rotations[this.currentRotation % this.activeTetromino.length];
   }
+
+  willCollide(x, y, piece = this.activeTetromino) {
+    for (let r = 0; r < piece.length; r++) {
+      for (let c = 0; c < piece.length; c++) {
+        if (!piece[r][c]) continue;
+        let newX = this.x + c + x;
+        let newY = this.y + r + y;
+        console.log(newX, newY);
+        if (newX < 0 || newX >= settings.cols || newY >= settings.rows)
+          return true;
+        if (newY < 0) continue;
+        if (board[newY][newX] != settings.emptyCellColor) return true;
+      }
+    }
+    return false;
+  }
 }
 
 function newGame() {
@@ -251,6 +267,15 @@ window.addEventListener("keyup", (e) => {
   switch (e.code.toLowerCase()) {
     case "arrowup":
       state.activeBlock.nextRotation();
+      break;
+    case "arrowleft":
+      if (!state.activeBlock.willCollide(-1, 0)) state.activeBlock.x--;
+      break;
+    case "arrowright":
+      if (!state.activeBlock.willCollide(1, 0)) state.activeBlock.x++;
+      break;
+    case "arrowdown":
+      if (!state.activeBlock.willCollide(0, 1)) state.activeBlock.y++;
       break;
 
     default:
