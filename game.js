@@ -12,6 +12,7 @@ const FPS = 60,
   COLS = 10,
   ROWS = 20,
   SIZE = canvas.height / ROWS;
+  
 const settings = {
   fps: FPS,
   fpsInterval: 1000 / FPS,
@@ -210,14 +211,31 @@ function randomColor() {
   return colors[Math.floor(Math.random() * colors.length)];
 }
 
+// args: array of objects of form
+//   { text: string, fillStyle?: string, font?: string }
+//
+function fillMixedText(args, x, y) {
+  let defaultFillStyle = ctx.fillStyle;
+  let defaultFont = ctx.font;
+
+  ctx.save();
+  args.forEach(({ text, fillStyle, font }) => {
+    ctx.fillStyle = fillStyle || defaultFillStyle;
+    ctx.font = font || defaultFont;
+    ctx.fillText(text, x, y);
+    x += ctx.measureText(text).width;
+  });
+  ctx.restore();
+}
+
 class Block {
-  constructor(rotations, color) {
+  constructor() {
     this.x = 4;
     this.y = -4;
-    this.color = color;
+    this.color = randomColor();
     this.downInterval = settings.blockDescendInterval * settings.fps;
     this.timer = 0;
-    this.rotations = rotations;
+    this.rotations = randomPiece();
     this.currentRotation = 0;
     this.activeTetromino = this.rotations[this.currentRotation];
     this.locked = false;
@@ -291,7 +309,8 @@ class Block {
 
 function newGame() {
   state = {
-    activeBlock: new Block(randomPiece(), randomColor()),
+    started: false,
+    activeBlock: new Block(),
     gameOver: false,
     score: 0,
   };
@@ -343,6 +362,27 @@ function drawScore() {
   ctx.fillText(state.score, scorePos.x, scorePos.y);
 }
 
+const multicoloredTitle = [
+  { text: "T", fillStyle: "red" },
+  { text: "E", fillStyle: "orange" },
+  { text: "T", fillStyle: "yellow" },
+  { text: "R", fillStyle: "green" },
+  { text: "I", fillStyle: "blue" },
+  { text: "S", fillStyle: "purple" },
+];
+function drawStartScreen() {
+  const pos = {
+    x: settings.boardOffset + (canvas.width - settings.boardOffset) / 2,
+    y: 150,
+  };
+  ctx.font = "80px Bangers cursive";
+  fillMixedText(
+    multicoloredTitle,
+    pos.x - ctx.measureText("TETRIS").width / 2,
+    pos.y
+  );
+}
+
 window.addEventListener("keyup", (e) => {
   switch (e.code.toLowerCase()) {
     case "arrowup":
@@ -370,13 +410,16 @@ window.addEventListener("keydown", (e) => {
 function update() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawBoard();
-  drawScore();
-  state.activeBlock.draw();
-  state.activeBlock.update();
+  if (state.started) {
+    drawScore();
+    state.activeBlock.draw();
+    state.activeBlock.update();
 
-  if (state.activeBlock.locked)
-    state.activeBlock = new Block(randomPiece(), randomColor());
-  if (state.gameOver) stop = true;
+    if (state.activeBlock.locked) state.activeBlock = new Block();
+    if (state.gameOver) stop = true;
+  } else {
+    drawStartScreen();
+  }
 }
 
 let stop = false,
