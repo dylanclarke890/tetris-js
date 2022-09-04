@@ -318,6 +318,7 @@ function newGame() {
     activeBlock: new Block(),
     gameOver: false,
     score: 0,
+    linesCleared: 0,
   };
 }
 
@@ -355,18 +356,23 @@ function removeFullRows() {
       for (let i = 0; i < settings.cols; i++)
         board[0][i] = settings.emptyCellColor;
       state.score += 10;
+      state.linesCleared++;
     }
   }
 }
 
 const scorePos = {
   x: settings.boardOffset + 150,
-  y: canvas.height - 20,
+  y: 30,
 };
-function drawScore() {
+function drawGameInfo() {
   ctx.fillStyle = "white";
   ctx.font = "30px Arial";
-  ctx.fillText(state.score, scorePos.x, scorePos.y);
+  ctx.fillText(`Current: ${state.score}`, scorePos.x, scorePos.y);
+
+  ctx.fillStyle = "white";
+  ctx.font = "30px Arial";
+  ctx.fillText(`Cleared: ${state.linesCleared}`, scorePos.x, scorePos.y + 50);
 }
 
 const multicoloredTitle = [
@@ -449,7 +455,7 @@ function update() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawBoard();
   if (state.started && !state.gameOver) {
-    drawScore();
+    drawGameInfo();
     state.activeBlock.draw();
     state.activeBlock.update();
 
