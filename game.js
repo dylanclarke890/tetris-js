@@ -234,10 +234,6 @@ function randomPiece() {
   return blockTypes[blocks[Math.floor(Math.random() * blocks.length)]];
 }
 
-function randomColor() {
-  return colors[Math.floor(Math.random() * colors.length)];
-}
-
 // args: array of objects of form
 //   { text: string, fillStyle?: string, font?: string }
 //
@@ -264,9 +260,9 @@ class Block {
   constructor() {
     this.x = 4;
     this.y = -4;
-    const piece = randomPiece();
-    this.color = piece.color;
-    this.rotations = piece.rotations;
+    const { color, rotations } = randomPiece();
+    this.color = color;
+    this.rotations = rotations;
     this.downInterval = settings.blockDescendInterval * settings.fps;
     this.timer = 0;
     this.currentRotation = 0;
