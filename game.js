@@ -313,12 +313,18 @@ class Block {
 }
 
 function newGame() {
+  const topScore = localStorage.getItem("tetrisScore");
+  const topLines = localStorage.getItem("tetrisLinesCleared");
   state = {
     started: false,
     activeBlock: new Block(),
     gameOver: false,
     score: 0,
     linesCleared: 0,
+    best: {
+      score: topScore ? parseInt(topScore) : 0,
+      linesCleared: topLines ? parseInt(topLines) : 0,
+    },
   };
 }
 
@@ -357,22 +363,36 @@ function removeFullRows() {
         board[0][i] = settings.emptyCellColor;
       state.score += 10;
       state.linesCleared++;
+      if (state.score > state.best.score) {
+        localStorage.setItem("tetrisScore", state.score);
+        state.best.score = state.score;
+      }
+      if (state.linesCleared > state.best.linesCleared) {
+        localStorage.setItem("tetrisLinesCleared", state.linesCleared);
+        state.best.linesCleared = state.linesCleared;
+      }
     }
   }
 }
 
 const scorePos = {
-  x: settings.boardOffset + 150,
+  x: settings.boardOffset,
   y: 30,
 };
 function drawGameInfo() {
+  ctx.textAlign = "left";
   ctx.fillStyle = "white";
   ctx.font = "30px Arial";
   ctx.fillText(`Current: ${state.score}`, scorePos.x, scorePos.y);
-
-  ctx.fillStyle = "white";
-  ctx.font = "30px Arial";
   ctx.fillText(`Cleared: ${state.linesCleared}`, scorePos.x, scorePos.y + 50);
+
+  ctx.textAlign = "right";
+  ctx.fillText(`Best: ${state.best.score}`, canvas.width, scorePos.y);
+  ctx.fillText(
+    `Best: ${state.best.linesCleared}`,
+    canvas.width,
+    scorePos.y + 50
+  );
 }
 
 const multicoloredTitle = [
