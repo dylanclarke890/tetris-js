@@ -17,10 +17,13 @@ const settings = {
   size: 25,
   emptyCellColor: "white",
   blockDescendInterval: 1, // in seconds
+  keyboardMoveInterval: 0.25,
 };
 let state;
 
 let board = [];
+
+let downPressed = false;
 
 (function createBoard() {
   const { cols, rows, emptyCellColor } = settings;
@@ -219,7 +222,11 @@ class Block {
   }
 
   update() {
-    if (this.timer % this.downInterval === 0) {
+    if (
+      this.timer % this.downInterval === 0 ||
+      (downPressed &&
+        this.timer % (settings.keyboardMoveInterval * settings.fps) === 0)
+    ) {
       if (!this.willCollide(0, 1, this.activeTetromino)) this.y += 1;
       else this.lock();
     }
@@ -309,12 +316,16 @@ window.addEventListener("keyup", (e) => {
       if (!state.activeBlock.willCollide(1, 0)) state.activeBlock.x++;
       break;
     case "arrowdown":
-      if (!state.activeBlock.willCollide(0, 1)) state.activeBlock.y++;
+      downPressed = false;
       break;
 
     default:
       break;
   }
+});
+
+window.addEventListener("keydown", (e) => {
+  if (e.code === "ArrowDown") downPressed = true;
 });
 
 function update() {
