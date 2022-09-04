@@ -194,7 +194,7 @@ const blockTypes = {
   ],
 };
 
-const colors = ["green", "orange", "red", "blue", "yellow"];
+const colors = ["green", "orange", "red", "blue", "purple"];
 
 function randomPiece() {
   const blocks = Object.keys(blockTypes);
@@ -235,8 +235,8 @@ class Block {
   }
 
   nextRotation() {
-    const next =
-      this.rotations[(this.currentRotation + 1) % this.activeTetromino.length];
+    const mod = this.rotations.length;
+    const next = this.rotations[(this.currentRotation + 1) % mod];
     let kick = this.willCollide(0, 0, next)
       ? this.x > settings.cols / 2
         ? -1
@@ -245,8 +245,8 @@ class Block {
 
     if (!this.willCollide(kick, 0, next)) {
       this.x += kick;
-      this.activeTetromino =
-        this.rotations[++this.currentRotation % this.activeTetromino.length];
+      this.currentRotation++;
+      this.activeTetromino = next;
     }
   }
 
