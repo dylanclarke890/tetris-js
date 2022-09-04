@@ -6,7 +6,7 @@ body {
 
 #play-area {
   border: 3px solid grey;
-  width: 800;
-  height: 500px;
+  width: 600px;
+  height: 600px;
   background: black;
 }

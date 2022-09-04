@@ -6,16 +6,17 @@ function new2dCanvas(id, width, height) {
   return [canvas, ctx];
 }
 
-const [canvas, ctx] = new2dCanvas("play-area", 800, 500);
+const [canvas, ctx] = new2dCanvas("play-area", 600, 600);
 
 const FPS = 60,
   COLS = 10,
-  SIZE = 25;
+  ROWS = 20,
+  SIZE = canvas.height / ROWS;
 const settings = {
   fps: FPS,
   fpsInterval: 1000 / FPS,
   cols: COLS,
-  rows: 20,
+  rows: ROWS,
   size: SIZE,
   boardOffset: COLS * SIZE,
   emptyCellColor: "white",
