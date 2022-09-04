@@ -242,9 +242,9 @@ function fillMixedText(args, x, y, stroke = false, strokeColor = "white") {
 }
 
 class Block {
-  constructor(x, y) {
-    this.x = x;
-    this.y = y;
+  constructor() {
+    this.x = 4;
+    this.y = -4;
     this.color = randomColor();
     this.downInterval = settings.blockDescendInterval * settings.fps;
     this.timer = 0;
@@ -272,6 +272,12 @@ class Block {
       for (let c = 0; c < this.activeTetromino[r].length; c++)
         if (this.activeTetromino[r][c])
           drawSquare(this.x + c, this.y + r, this.color);
+  }
+
+  drawPreviewAt(x, y) {
+    for (let r = 0; r < this.rotations[0].length; r++)
+      for (let c = 0; c < this.rotations[0][r].length; c++)
+        if (this.rotations[0][r][c]) drawSquare(x + c, y + r, this.color);
   }
 
   nextRotation() {
@@ -323,11 +329,10 @@ class Block {
 function newGame() {
   const topScore = localStorage.getItem("tetrisScore");
   const topLines = localStorage.getItem("tetrisLinesCleared");
-  const { defaultPiecePos, defaultPreviewPos } = settings;
   state = {
     started: false,
-    activeBlock: new Block(defaultPiecePos.x, defaultPiecePos.y),
-    nextBlock: new Block(defaultPreviewPos.x, defaultPreviewPos.y),
+    activeBlock: new Block(),
+    nextBlock: new Block(),
     gameOver: false,
     score: 0,
     linesCleared: 0,
@@ -405,9 +410,17 @@ function drawGameInfo() {
   );
 
   ctx.textAlign = "left";
+  ctx.fillStyle = "white";
+  const currText = "Current:";
+  ctx.fillText(currText, scorePos.x + 20, scorePos.y + 100);
+  const { defaultPreviewPos } = settings;
+  state.activeBlock.drawPreviewAt(defaultPreviewPos.x, defaultPreviewPos.y);
+
+  ctx.textAlign = "right";
+  ctx.fillStyle = "white";
   const nextText = "Next:";
-  ctx.fillText(nextText, scorePos.x + 20, scorePos.y + 100);
-  state.nextBlock.draw();
+  ctx.fillText(nextText, scorePos.x + 240, scorePos.y + 100);
+  state.nextBlock.drawPreviewAt(defaultPreviewPos.x + 5, defaultPreviewPos.y);
 }
 
 const multicoloredTitle = [
@@ -495,11 +508,8 @@ function update() {
     state.activeBlock.update();
 
     if (state.activeBlock.locked) {
-      const { defaultPiecePos, defaultPreviewPos } = settings;
       state.activeBlock = state.nextBlock;
-      state.activeBlock.x = defaultPiecePos.x;
-      state.activeBlock.y = defaultPiecePos.y;
-      state.nextBlock = new Block(defaultPreviewPos.x, defaultPreviewPos.y);
+      state.nextBlock = new Block();
     }
   } else if (!state.started) drawStartScreen();
   else drawGameOverScreen();
