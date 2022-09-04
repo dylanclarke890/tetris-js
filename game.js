@@ -372,6 +372,7 @@ const multicoloredTitle = [
   { text: "I", fillStyle: "blue" },
   { text: "S", fillStyle: "purple" },
 ];
+
 function drawStartScreen() {
   const pos = {
     x: settings.boardOffset + (canvas.width - settings.boardOffset) / 2,
@@ -411,6 +412,8 @@ function drawStartScreen() {
   );
 }
 
+function drawGameOverScreen() {}
+
 window.addEventListener("keyup", (e) => {
   switch (e.code.toLowerCase()) {
     case "arrowup":
@@ -439,16 +442,14 @@ window.addEventListener("keydown", (e) => {
 function update() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawBoard();
-  if (state.started) {
+  if (state.started && !state.gameOver) {
     drawScore();
     state.activeBlock.draw();
     state.activeBlock.update();
 
     if (state.activeBlock.locked) state.activeBlock = new Block();
-    if (state.gameOver) stop = true;
-  } else {
-    drawStartScreen();
-  }
+  } else if (!state.started) drawStartScreen();
+  else drawGameOverScreen();
 }
 
 let stop = false,
