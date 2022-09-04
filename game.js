@@ -88,7 +88,7 @@ const blockTypes = {
     [
       [0, 1, 1],
       [1, 1, 0],
-      [1, 0, 0],
+      [0, 0, 0],
     ],
     [
       [0, 1, 0],
@@ -194,9 +194,15 @@ const blockTypes = {
   ],
 };
 
+const colors = ["green", "orange", "red", "blue", "yellow"];
+
 function randomPiece() {
   const blocks = Object.keys(blockTypes);
   return blockTypes[blocks[Math.floor(Math.random() * blocks.length)]];
+}
+
+function randomColor() {
+  return colors[Math.floor(Math.random() * colors.length)];
 }
 
 class Block {
@@ -209,14 +215,15 @@ class Block {
     this.rotations = rotations;
     this.currentRotation = 0;
     this.activeTetromino = this.rotations[this.currentRotation];
+    this.locked = false;
   }
 
   update() {
-    if (
-      this.timer % this.downInterval === 0 &&
-      !this.willCollide(0, 1, this.activeTetromino)
-    )
-      this.y += 1;
+    if (this.timer % this.downInterval === 0) {
+      if (!this.willCollide(0, 1, this.activeTetromino)) this.y += 1;
+      else this.lock();
+    }
+
     this.timer++;
   }
 
@@ -257,11 +264,20 @@ class Block {
     }
     return false;
   }
+
+  lock() {
+    for (let r = 0; r < this.activeTetromino.length; r++)
+      for (let c = 0; c < this.activeTetromino[r].length; c++) {
+        if (!this.activeTetromino[r][c]) continue;
+        this.locked = true;
+        board[this.y + r][this.x + c] = this.color;
+      }
+  }
 }
 
 function newGame() {
   state = {
-    activeBlock: new Block(randomPiece(), "green"),
+    activeBlock: new Block(randomPiece(), randomColor()),
   };
 }
 
@@ -303,8 +319,10 @@ window.addEventListener("keyup", (e) => {
 
 function update() {
   drawBoard();
-  state.activeBlock.update();
   state.activeBlock.draw();
+  state.activeBlock.update();
+  if (state.activeBlock.locked)
+    state.activeBlock = new Block(randomPiece(), randomColor());
 }
 
 let stop = false,
