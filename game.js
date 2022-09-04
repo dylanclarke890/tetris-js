@@ -23,6 +23,14 @@ const settings = {
   emptyCellColor: "white",
   blockDescendInterval: 1, // in seconds
   keyboardMoveInterval: 0.25,
+  defaultPreviewPos: {
+    x: COLS + 1,
+    y: 5,
+  },
+  defaultPiecePos: {
+    x: 4,
+    y: -4,
+  },
 };
 let state;
 let board = [];
@@ -234,9 +242,9 @@ function fillMixedText(args, x, y, stroke = false, strokeColor = "white") {
 }
 
 class Block {
-  constructor() {
-    this.x = 4;
-    this.y = -4;
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
     this.color = randomColor();
     this.downInterval = settings.blockDescendInterval * settings.fps;
     this.timer = 0;
@@ -315,10 +323,11 @@ class Block {
 function newGame() {
   const topScore = localStorage.getItem("tetrisScore");
   const topLines = localStorage.getItem("tetrisLinesCleared");
+  const { defaultPiecePos, defaultPreviewPos } = settings;
   state = {
     started: false,
-    activeBlock: new Block(),
-    nextBlock: new Block(),
+    activeBlock: new Block(defaultPiecePos.x, defaultPiecePos.y),
+    nextBlock: new Block(defaultPreviewPos.x, defaultPreviewPos.y),
     gameOver: false,
     score: 0,
     linesCleared: 0,
@@ -397,8 +406,8 @@ function drawGameInfo() {
 
   ctx.textAlign = "left";
   const nextText = "Next:";
-  ctx.fillText(nextText, scorePos.x, scorePos.y + 100);
-  drawSquare(settings.cols + 2, settings.rows - 10, "blue");
+  ctx.fillText(nextText, scorePos.x + 20, scorePos.y + 100);
+  state.nextBlock.draw();
 }
 
 const multicoloredTitle = [
@@ -486,8 +495,11 @@ function update() {
     state.activeBlock.update();
 
     if (state.activeBlock.locked) {
+      const { defaultPiecePos, defaultPreviewPos } = settings;
       state.activeBlock = state.nextBlock;
-      state.nextBlock = new Block();
+      state.activeBlock.x = defaultPiecePos.x;
+      state.activeBlock.y = defaultPiecePos.y;
+      state.nextBlock = new Block(defaultPreviewPos.x, defaultPreviewPos.y);
     }
   } else if (!state.started) drawStartScreen();
   else drawGameOverScreen();
