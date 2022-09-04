@@ -196,18 +196,18 @@ const blockTypes = {
 
 class Block {
   constructor(rotations, color) {
-    this.rotations = rotations;
-    this.color = color;
-    this.currentRotation = 0;
-    this.activeTetromino = this.rotations[this.currentRotation];
-    this.downInterval = settings.blockDescendInterval * settings.fps;
-    this.timer = 0;
     this.x = 0;
     this.y = 0;
+    this.color = color;
+    this.downInterval = settings.blockDescendInterval * settings.fps;
+    this.timer = 0;
+    this.rotations = rotations;
+    this.currentRotation = 0;
+    this.activeTetromino = this.rotations[this.currentRotation];
   }
 
   update() {
-    if (this.timer % this.downInterval === 0) this.y += 1;
+    if (this.timer % this.downInterval === 0 && !this.willCollide(0, 1, this.activeTetromino)) this.y += 1;
     this.timer++;
   }
 
@@ -219,9 +219,19 @@ class Block {
   }
 
   nextRotation() {
-    this.currentRotation++;
-    this.activeTetromino =
-      this.rotations[this.currentRotation % this.activeTetromino.length];
+    const next =
+      this.rotations[(this.currentRotation + 1) % this.activeTetromino.length];
+    let kick = this.willCollide(0, 0, next)
+      ? this.x > settings.cols / 2
+        ? -1
+        : 1
+      : 0;
+
+    if (!this.willCollide(kick, 0, next)) {
+      this.x += kick;
+      this.activeTetromino =
+        this.rotations[++this.currentRotation % this.activeTetromino.length];
+    }
   }
 
   willCollide(x, y, piece = this.activeTetromino) {
@@ -230,7 +240,6 @@ class Block {
         if (!piece[r][c]) continue;
         let newX = this.x + c + x;
         let newY = this.y + r + y;
-        console.log(newX, newY);
         if (newX < 0 || newX >= settings.cols || newY >= settings.rows)
           return true;
         if (newY < 0) continue;
