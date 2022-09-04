@@ -214,16 +214,21 @@ function randomColor() {
 // args: array of objects of form
 //   { text: string, fillStyle?: string, font?: string }
 //
-function fillMixedText(args, x, y) {
+function fillMixedText(args, x, y, stroke = false, strokeColor = "white") {
   let defaultFillStyle = ctx.fillStyle;
   let defaultFont = ctx.font;
   ctx.textAlign = "left";
+  ctx.lineWidth = 2;
   ctx.save();
   args.forEach(({ text, fillStyle, font }) => {
     ctx.fillStyle = fillStyle || defaultFillStyle;
     ctx.font = font || defaultFont;
     ctx.fillText(text, x, y);
-    x += ctx.measureText(text).width;
+    if (stroke) {
+      ctx.strokeStyle = strokeColor;
+      ctx.strokeText(text, x, y);
+    }
+    x += ctx.measureText(text).width + 2;
   });
   ctx.restore();
 }
@@ -382,14 +387,15 @@ function drawStartScreen() {
   fillMixedText(
     multicoloredTitle,
     pos.x - ctx.measureText("TETRIS").width / 2,
-    pos.y
+    pos.y,
+    true
   );
 
   ctx.font = "30px Bangers cursive";
   const text = "space to start";
 
   ctx.lineWidth = 4;
-  ctx.strokeStyle = "orange";
+  ctx.strokeStyle = "purple";
   const w = ctx.measureText(text).width + 20,
     h = 50;
   const startButtonArgs = [
@@ -402,7 +408,7 @@ function drawStartScreen() {
   ctx.fillRect(...startButtonArgs);
   ctx.strokeRect(...startButtonArgs);
 
-  ctx.fillStyle = "lightblue";
+  ctx.fillStyle = "green";
 
   ctx.textAlign = "center";
   ctx.fillText(
