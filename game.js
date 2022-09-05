@@ -11,7 +11,8 @@ const [canvas, ctx] = new2dCanvas("play-area", 600, 600);
 const FPS = 60,
   COLS = 10,
   ROWS = 20,
-  SIZE = canvas.height / ROWS;
+  SIZE = canvas.height / ROWS,
+  DEFAULT_MOVE_SPEED = 0.5;
 
 const settings = {
   fps: FPS,
@@ -21,8 +22,8 @@ const settings = {
   size: SIZE,
   boardOffset: COLS * SIZE,
   emptyCellColor: "white",
-  blockDescendInterval: 1, // in seconds
-  keyboardMoveInterval: 0.25,
+  blockDescendInterval: DEFAULT_MOVE_SPEED, // in seconds
+  keyboardMoveInterval: DEFAULT_MOVE_SPEED / 4,
   defaultPreviewPos: {
     x: COLS + 1,
     y: 5,
@@ -34,7 +35,11 @@ const settings = {
 };
 let state;
 let board = [];
-let downPressed = false;
+const pressed = {
+  left: false,
+  right: false,
+  down: false,
+};
 
 (function createBoard() {
   const { cols, rows, emptyCellColor } = settings;
@@ -95,7 +100,7 @@ const blockTypes = {
     ],
   },
   s: {
-    color: "yellow",
+    color: "darkgoldenrod",
     rotations: [
       [
         [0, 0, 0],
@@ -170,7 +175,7 @@ const blockTypes = {
     ],
   },
   o: {
-    color: "pink",
+    color: "hotpink",
     rotations: [
       [
         [0, 0, 0, 0],
@@ -271,15 +276,28 @@ class Block {
   }
 
   update() {
+    const isIntervalOfKeyboardMovement =
+      this.timer % (settings.keyboardMoveInterval * settings.fps) === 0;
     if (
       this.timer % this.downInterval === 0 ||
-      (downPressed &&
-        this.timer % (settings.keyboardMoveInterval * settings.fps) === 0)
+      (pressed.down && isIntervalOfKeyboardMovement)
     ) {
-      if (!this.willCollide(0, 1, this.activeTetromino)) this.y += 1;
+      if (!this.willCollide(0, 1, this.activeTetromino)) this.y++;
       else this.lock();
     }
 
+    if (
+      pressed.right &&
+      isIntervalOfKeyboardMovement &&
+      !this.willCollide(1, 0)
+    )
+      this.x++;
+    if (
+      pressed.left &&
+      isIntervalOfKeyboardMovement &&
+      !this.willCollide(-1, 0)
+    )
+      this.x--;
     this.timer++;
   }
 
@@ -496,13 +514,13 @@ window.addEventListener("keyup", (e) => {
       state.activeBlock.nextRotation();
       break;
     case "arrowleft":
-      if (!state.activeBlock.willCollide(-1, 0)) state.activeBlock.x--;
+      pressed.left = false;
       break;
     case "arrowright":
-      if (!state.activeBlock.willCollide(1, 0)) state.activeBlock.x++;
+      pressed.right = false;
       break;
     case "arrowdown":
-      downPressed = false;
+      pressed.down = false;
       break;
 
     default:
@@ -511,8 +529,22 @@ window.addEventListener("keyup", (e) => {
 });
 
 window.addEventListener("keydown", (e) => {
-  if (!state.started && e.code === "Space") state.started = true;
-  if (e.code === "ArrowDown") downPressed = true;
+  switch (e.code.toLowerCase()) {
+    case "arrowleft":
+      pressed.left = true;
+      break;
+    case "arrowright":
+      pressed.right = true;
+      break;
+    case "arrowdown":
+      pressed.down = true;
+      break;
+    case "space":
+      if (!state.started) state.started = true;
+      break;
+    default:
+      break;
+  }
 });
 
 function update() {
